@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选择判断器</title>
+    <style>
+        #q1, #q2, #q3, #q4, #q5 {color: brown; font-size: 24px;}
+        audio {display: none;} /* 隐藏音频控件 */
+    </style>
+</head>
+<body>
+    <h1>2025九年级英语听力口语测试</h1>
+    <form id="quiz-form">
+        <!-- 开始播放按钮 -->
+        <button type="button" onclick="playNextAudio()">开始播放</button>
+
+        <!-- 第一题 -->
+        <div>
+            <audio id="audio-q1" src="../1/1.1.1.mp3" onended="handleAudioEnded()">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <p id="q1">1. What do people usually do when they talk?</p>
+            <input type="radio" id="q1a" name="q1" value="A">
+            <label for="q1a">A. <span class="option-text">Look at each other.</span></label><br>
+            <input type="radio" id="q1b" name="q1" value="B">
+            <label for="q1b">B. <span class="option-text">Touch others.</span></label><br>
+            <input type="radio" id="q1c" name="q1" value="C">
+            <label for="q1c">C. <span class="option-text">Stand close.</span></label><br>
+        </div>
+        <hr>
+
+        <!-- 第二题 -->
+        <div>
+            <audio id="audio-q2" src="../1/1.1.2.mp3" onended="handleAudioEnded()">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <p id="q2">2. Which city may Betty visit?</p>
+            <input type="radio" id="q2a" name="q2" value="A">
+            <label for="q2a">A. <span class="option-text">Sydney.</span></label><br>
+            <input type="radio" id="q2b" name="q2" value="B">
+            <label for="q2b">B. <span class="option-text">Chongqing.</span></label><br>
+            <input type="radio" id="q2c" name="q2" value="C">
+            <label for="q2c">C. <span class="option-text">New York.</span></label><br>
+        </div>
+        <hr>
+
+        <!-- 第三题 -->
+        <div>
+            <audio id="audio-q3" src="../1/1.1.3.mp3" onended="handleAudioEnded()">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <p id="q3">3. How did Betty feel when she was in Yingkou?</p>
+            <input type="radio" id="q3a" name="q3" value="A">
+            <label for="q3a">A. <span class="option-text">Happy.</span></label><br>
+            <input type="radio" id="q3b" name="q3" value="B">
+            <label for="q3b">B. <span class="option-text">Bored.</span></label><br>
+            <input type="radio" id="q3c" name="q3" value="C">
+            <label for="q3c">C. <span class="option-text">Excited.</span></label><br>
+        </div>
+        <hr>
+
+        <!-- 第四题 -->
+        <div>
+            <audio id="audio-q4" src="../1/1.1.4.mp3" onended="handleAudioEnded()">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <p id="q4">4. Where is Quincy?</p>
+            <input type="radio" id="q4a" name="q4" value="A">
+            <label for="q4a">A. <span class="option-text">On the west coast of America.</span></label><br>
+            <input type="radio" id="q4b" name="q4" value="B">
+            <label for="q4b">B. <span class="option-text">On the east coast of America.</span></label><br>
+            <input type="radio" id="q4c" name="q4" value="C">
+            <label for="q4c">C. <span class="option-text">On the south coast of Australia.</span></label><br>
+        </div>
+        <hr>
+
+        <!-- 第五题 -->
+        <div>
+            <audio id="audio-q5" src="../1/1.1.5.mp3" onended="handleAudioEnded()">
+                您的浏览器不支持 audio 标签。
+            </audio>
+            <p id="q5">5. When did he have his first piano concert?</p>
+            <input type="radio" id="q5a" name="q5" value="A">
+            <label for="q5a">A. <span class="option-text">At the age of thirteen.</span></label><br>
+            <input type="radio" id="q5b" name="q5" value="B">
+            <label for="q5b">B. <span class="option-text">At the age of 6.</span></label><br>
+            <input type="radio" id="q5c" name="q5" value="C">
+            <label for="q5c">C. <span class="option-text">At the age of 7.</span></label><br>
+        </div>
+        <hr>
+
+        <!-- 提交按钮 -->
+        <button type="button" onclick="checkAnswers()">提交答案</button><br>
+        <a href="./EL12.html">下一题</a>
+    </form>
+
+    <!-- 正确答案显示 -->
+    <div id="result"></div>
+
+    <script>
+        let correctAnswers = []; // 存储正确答案对应的选项值
+        const originalCorrectTexts = [
+            "Look at each other.",
+            "Chongqing.",
+            "Happy.",
+            "On the east coast of America.",
+            "At the age of 7."
+        ];
+
+        let audioPlayedCount = 0; // 用于记录当前音频播放次数
+        let currentAudioIndex = 0; // 当前播放的音频索引
+
+        window.onload = function() {
+            randomizeOptionTexts();
+            loadUserAnswersFromCookie();
+        };
+
+        function randomizeOptionTexts() {
+            const questions = document.querySelectorAll('#quiz-form > div');
+            correctAnswers = []; // 重置正确答案数组
+            
+            questions.forEach((question, index) => {
+                const options = question.querySelectorAll('input[type="radio"]');
+                const labels = question.querySelectorAll('label');
+                const originalTexts = Array.from(labels).map(label => 
+                    label.querySelector('.option-text').textContent
+                );
+    
+                const shuffledTexts = [...originalTexts];
+                for (let i = shuffledTexts.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffledTexts[i], shuffledTexts[j]] = [shuffledTexts[j], shuffledTexts[i]];
+                }
+    
+                options.forEach((option, i) => {
+                    const label = labels[i];
+                    label.querySelector('.option-text').textContent = shuffledTexts[i];
+                    
+                    if(shuffledTexts[i] === originalCorrectTexts[index]) {
+                        correctAnswers[index] = option.value;
+                    }
+                });
+            });
+        }
+
+        function handleAudioEnded() {
+            if (audioPlayedCount < 1) {
+                // 同一音频播放两次（第一次播放后停顿一秒再播放第二次）
+                setTimeout(() => {
+                    playNextAudio();
+                }, 1000);
+            } else {
+                // 在第二次播放结束后停顿三秒再播放下一个音频
+                setTimeout(() => {
+                    audioPlayedCount = 0; // 重置播放次数
+                    currentAudioIndex++; // 切换到下一个音频
+                    if (currentAudioIndex < 5) {
+                        playNextAudio();
+                    } else {
+                        alert('所有音频已播放完毕，请开始答题。');
+                    }
+                }, 3000);
+            }
+        }
+
+        function playNextAudio() {
+            const audio = document.getElementById(`audio-q${currentAudioIndex + 1}`);
+            if (audio) {
+                audio.play();
+                audioPlayedCount++;
+            }
+        }
+
+        function checkAnswers() {
+            let userAnswers = [
+                document.querySelector('input[name="q1"]:checked')?.value || "",
+                document.querySelector('input[name="q2"]:checked')?.value || "",
+                document.querySelector('input[name="q3"]:checked')?.value || "",
+                document.querySelector('input[name="q4"]:checked')?.value || "",
+                document.querySelector('input[name="q5"]:checked')?.value || ""
+            ];
+            
+            // 保存用户答案到cookie
+            saveUserAnswersToCookie(userAnswers);
+
+            let score = 0;
+            let resultHTML = "";
+
+            userAnswers.forEach((answer, index) => {
+                if(answer === correctAnswers[index]) {
+                    score++;
+                    resultHTML += `第${index+1}题：✅ 正确<br>`;
+                } else {
+                    resultHTML += `第${index+1}题：❌ 错误（正确答案：${correctAnswers[index]}）<br>`;
+                }
+            });
+
+            document.getElementById("result").innerHTML = `
+                你的得分：${score} / ${correctAnswers.length}<br>
+                ${resultHTML}
+            `;
+        }
+
+        function saveUserAnswersToCookie(userAnswers) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (1 * 24 * 60 * 60 * 1000)); // 设置cookie有效期为1天
+            const cookieString = `userAnswers=${JSON.stringify(userAnswers)}; expires=${expires.toUTCString()}; path=/`;
+            document.cookie = cookieString;
+        }
+
+        function loadUserAnswersFromCookie() {
+            const name = "userAnswers=";
+            const cookies = document.cookie.split(';');
+            for(let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i];
+                while (cookie.charAt(0) === ' ') {
+                    cookie = cookie.substring(1);
+                }
+                if (cookie.indexOf(name) === 0) {
+                    const userAnswers = JSON.parse(cookie.substring(name.length, cookie.length));
+                    userAnswers.forEach((answer, index) => {
+                        if(answer) {
+                            document.querySelector(`input[name="q${index+1}"][value="${answer}"]`).checked = true;
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
